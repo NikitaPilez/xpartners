@@ -17,16 +17,66 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use OpenApi\Attributes as OA;
 
 #[Route('/api/account')]
 class AccountController extends AbstractController
 {
+    #[OA\Get(
+        description: 'Get all accounts',
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Return all accounts',
+//        content: new OA\JsonContent(
+//            type: 'array',
+//            items: new OA\Items(ref: new Model(type: Account::class, groups: ['account', 'client']))
+//        )
+    )]
+    #[OA\Parameter(
+        name: 'AUTH-TOKEN',
+        description: 'API key',
+        in: 'header',
+        required: true,
+    )]
+    #[OA\Tag(name: 'accounts')]
     #[Route('/', name: 'account_index', methods: ['GET'])]
     public function index(AccountRepository $accountRepository): Response
     {
         return $this->json(data: $accountRepository->findAll(), context: ['groups' => ['account', 'client']]);
     }
 
+    #[OA\Post(
+        description: 'Create new account for client',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: [
+                    'client_id',
+                    'currency',
+                ],
+                properties: [
+                    new OA\Property(
+                        property: 'client_id', description: 'ID client', type: 'integer', example: 1,
+                    ),
+                    new OA\Property(
+                        property: 'currency', description: 'Currency key (USD/EUR/RUB)', type: 'string', example: 'EUR',
+                    )
+                ]
+            )
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Return new account',
+    )]
+    #[OA\Parameter(
+        name: 'AUTH-TOKEN',
+        description: 'API key',
+        in: 'header',
+        required: true,
+    )]
+    #[OA\Tag(name: 'accounts')]
     #[Route('/', name: 'account_new', methods: ['POST'])]
     public function new(CreateAccountRequest $request, CreateAccountService $createAccountService): Response
     {
@@ -36,6 +86,17 @@ class AccountController extends AbstractController
         return $this->json(data: $account, context: ['groups' => ['account', 'client']]);
     }
 
+    #[OA\Response(
+        response: 200,
+        description: 'Returns account by id',
+    )]
+    #[OA\Parameter(
+        name: 'AUTH-TOKEN',
+        description: 'API key',
+        in: 'header',
+        required: true,
+    )]
+    #[OA\Tag(name: 'accounts')]
     #[Route('/{id}', name: 'account_show', methods: ['GET'])]
     public function show(Account $account = null): Response
     {
@@ -46,6 +107,29 @@ class AccountController extends AbstractController
         return $this->json(data: $account, context: ['groups' => ['account', 'client']]);
     }
 
+    #[OA\Post(
+        description: 'Update account',
+        requestBody: new OA\RequestBody(
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: 'is_active', description: 'Active/deactivate account', type: 'boolean', example: false,
+                    ),
+                ]
+            )
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Return updated account',
+    )]
+    #[OA\Parameter(
+        name: 'AUTH-TOKEN',
+        description: 'API key',
+        in: 'header',
+        required: true,
+    )]
+    #[OA\Tag(name: 'accounts')]
     #[Route('/{id}/edit', name: 'account_edit', methods: ['POST'])]
     public function edit(UpdateAccountRequest $request, UpdateAccountService $updateAccountService, Account $account = null): Response
     {
@@ -59,6 +143,17 @@ class AccountController extends AbstractController
         return $this->json(data: $account, context: ['groups' => ['account', 'client']]);
     }
 
+    #[OA\Response(
+        response: 200,
+        description: 'Returns message that success deleted',
+    )]
+    #[OA\Parameter(
+        name: 'AUTH-TOKEN',
+        description: 'API key',
+        in: 'header',
+        required: true,
+    )]
+    #[OA\Tag(name: 'accounts')]
     #[Route('/{id}', name: 'account_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Account $account = null): Response
     {

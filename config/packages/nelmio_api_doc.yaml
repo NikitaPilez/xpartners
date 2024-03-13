@@ -1,0 +1,14 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: XPartners
+            version: 1.0.0
+        security:
+            securityDefinitions:
+                ApiKey:
+                    type: apiKey
+                    name: AUTH_TOKEN
+                    in: header
+    areas:
+        path_patterns:
+            - ^/api
