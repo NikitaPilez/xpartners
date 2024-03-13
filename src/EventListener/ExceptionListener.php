@@ -14,10 +14,16 @@ class ExceptionListener
     public function onKernelException(ExceptionEvent $event): void
     {
         $exception = $event->getThrowable();
-        if ($exception instanceof InvalidJsonRequestException || $exception instanceof NotFoundException) {
+        if ($exception instanceof InvalidJsonRequestException) {
             $response = new JsonResponse(
                 data: ['errors' => $exception->getErrors()],
                 status: 400,
+            );
+            $event->setResponse($response);
+        } else if ($exception instanceof NotFoundException) {
+            $response = new JsonResponse(
+                data: ['errors' => $exception->getErrors()],
+                status: 404,
             );
             $event->setResponse($response);
         }

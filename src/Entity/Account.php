@@ -1,29 +1,37 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\AccountRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: AccountRepository::class)]
 class Account
 {
+    #[Groups('account')]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups('account')]
     #[ORM\Column(length: 255)]
     private ?string $number = null;
 
+    #[Groups('account')]
     #[ORM\Column(length: 255)]
     private ?string $currency = null;
 
+    #[Groups('client')]
     #[ORM\ManyToOne(inversedBy: 'accounts')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Client $client = null;
 
     #[ORM\Column]
+    #[Groups('account')]
     private ?bool $active = null;
 
     public function getId(): ?int
