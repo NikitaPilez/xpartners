@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\DTO\CreateAccountDTO;
+use App\DTO\MakePayDTO;
 use App\DTO\UpdateAccountDTO;
 use App\Entity\Account;
 use App\Exception\NotFoundException;
 use App\Repository\AccountRepository;
 use App\Request\CreateAccountRequest;
+use App\Request\MakePayRequest;
 use App\Request\UpdateAccountRequest;
 use App\Services\CreateAccountService;
+use App\Services\MakePaymentService;
 use App\Services\UpdateAccountService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -165,5 +168,55 @@ class AccountController extends AbstractController
         $entityManager->flush();
 
         return $this->json(['message' => 'Success deleted']);
+    }
+
+    #[OA\Post(
+        description: 'Make payment',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: [
+                    'sender_id',
+                    'receiver_id',
+                    'value',
+                ],
+                properties: [
+                    new OA\Property(
+                        property: 'sender_id', description: 'ID sender', type: 'integer', example: 1,
+                    ),
+                    new OA\Property(
+                        property: 'receiver_id', description: 'ID receiver', type: 'integer', example: 2,
+                    ),
+                    new OA\Property(
+                        property: 'value', description: 'Value', type: 'float', example: '9.99',
+                    ),
+                    new OA\Property(
+                        property: 'comment', description: 'Comment', type: 'string', example: 'Gift',
+                    )
+                ]
+            )
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Return pay result',
+    )]
+    #[OA\Parameter(
+        name: 'AUTH-TOKEN',
+        description: 'API key',
+        in: 'header',
+        required: true,
+    )]
+    #[OA\Tag(name: 'accounts')]
+    #[Route('/pay', name: 'account_pay', methods: ['POST'])]
+    public function pay(MakePayRequest $request, MakePaymentService $makePaymentService): Response
+    {
+        $makePayDTO = MakePayDTO::fromRequest($request);
+        $paymentResultDTO = $makePaymentService->pay($makePayDTO->senderId, $makePayDTO->receiverId, $makePayDTO->value, $makePayDTO->comment);
+
+        return $this->json([
+            'message' => $paymentResultDTO->message,
+            'success' => $paymentResultDTO->isSuccess,
+        ]);
     }
 }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\AccountRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
@@ -33,6 +35,22 @@ class Account
     #[ORM\Column]
     #[Groups('account')]
     private ?bool $active = null;
+
+    #[Groups('account')]
+    #[ORM\Column(nullable: true)]
+    private ?float $coin = null;
+
+    #[ORM\OneToMany(targetEntity: Transaction::class, mappedBy: 'receiver')]
+    private Collection $receivers;
+
+    #[ORM\OneToMany(targetEntity: Transaction::class, mappedBy: 'sender')]
+    private Collection $senders;
+
+    public function __construct()
+    {
+        $this->receivers = new ArrayCollection();
+        $this->senders = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -83,6 +101,78 @@ class Account
     public function setActive(bool $active): static
     {
         $this->active = $active;
+
+        return $this;
+    }
+
+    public function getCoin(): ?float
+    {
+        return $this->coin;
+    }
+
+    public function setCoin(?float $coin): static
+    {
+        $this->coin = $coin;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Transaction>
+     */
+    public function getReceivers(): Collection
+    {
+        return $this->receivers;
+    }
+
+    public function addReceiver(Transaction $receiver): static
+    {
+        if (!$this->receivers->contains($receiver)) {
+            $this->receivers->add($receiver);
+            $receiver->setReceiver($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReceiver(Transaction $receiver): static
+    {
+        if ($this->receivers->removeElement($receiver)) {
+            // set the owning side to null (unless already changed)
+            if ($receiver->getReceiver() === $this) {
+                $receiver->setReceiver(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Transaction>
+     */
+    public function getSenders(): Collection
+    {
+        return $this->senders;
+    }
+
+    public function addSender(Transaction $sender): static
+    {
+        if (!$this->senders->contains($sender)) {
+            $this->senders->add($sender);
+            $sender->setSender($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSender(Transaction $sender): static
+    {
+        if ($this->senders->removeElement($sender)) {
+            // set the owning side to null (unless already changed)
+            if ($sender->getSender() === $this) {
+                $sender->setSender(null);
+            }
+        }
 
         return $this;
     }

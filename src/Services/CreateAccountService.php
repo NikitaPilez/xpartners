@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Entity\Account;
 use App\Exception\NotFoundException;
+use App\Helpers\GenerateAccountNumber;
 use App\Repository\AccountRepository;
 use App\Repository\ClientRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -41,7 +42,8 @@ class CreateAccountService
         $account->setActive(true);
         $account->setClient($client);
         $account->setCurrency($currency);
-        $account->setNumber('123'); // TODO
+        $account->setCoin(rand(100, 1000));
+        $account->setNumber(GenerateAccountNumber::generate());
 
         $this->entityManager->persist($account);
         $this->entityManager->flush();
