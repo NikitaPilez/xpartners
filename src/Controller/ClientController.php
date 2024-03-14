@@ -148,7 +148,7 @@ class ClientController extends AbstractController
         }
 
         $updateClientDTO = UpdateClientDTO::fromRequest($request);
-        $client = $updateClientService->update($client, $updateClientDTO->username, $updateClientDTO->phone, $updateClientDTO->email);
+        $client = $updateClientService->update($client, $updateClientDTO->username, $updateClientDTO->email, $updateClientDTO->phone);
         return $this->json(data: $client, context: ['groups' => 'client']);
     }
 
