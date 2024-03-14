@@ -40,9 +40,12 @@
 
 **Создаем базу для тестов**
 `docker exec -it xpartners_php php bin/console --env=test doctrine:database:create`
+
 **Накатываем миграции**
 `docker exec -it xpartners_php php bin/console --env=test doctrine:schema:create`
+
 **Фикстуры накатываем**
 `docker exec -it xpartners_php php bin/console --env=test doctrine:fixtures:load`
+
 **Запустить тесты**
 `docker exec -it xpartners_php php bin/phpunit`
